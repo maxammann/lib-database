@@ -12,11 +12,11 @@ import java.util.Map;
  */
 public abstract class QueryProvider implements Closable {
 
-    private final DSLContext context;
+    private final DSLProvider provider;
     private Map<QueryKey, QueryBuilder> builders = new THashMap<>();
 
-    protected QueryProvider(DSLContext context) {
-        this.context = context;
+    protected QueryProvider(DSLProvider provider) {
+        this.provider = provider;
     }
 
     public abstract void cache();
@@ -45,7 +45,7 @@ public abstract class QueryProvider implements Closable {
             throw new IllegalStateException("Query " + key + " not found!");
         }
 
-        return key.toQuery(query.create(context));
+        return key.toQuery(query.create(provider.getDSLContext()));
     }
 
     @Override

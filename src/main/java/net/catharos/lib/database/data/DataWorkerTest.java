@@ -1,6 +1,7 @@
 package net.catharos.lib.database.data;
 
 
+import net.catharos.lib.database.DSLProvider;
 import net.catharos.lib.database.DatabaseMock;
 import net.catharos.lib.database.QueryKey;
 import net.catharos.lib.database.QueryProvider;
@@ -53,7 +54,12 @@ public class DataWorkerTest {
 
         final QueryKey<Query> TEST_KEY = new QueryKey<>();
 
-        final QueryProvider provider = new QueryProvider(dslContext) {
+        final QueryProvider provider = new QueryProvider(new DSLProvider() {
+            @Override
+            public DSLContext getDSLContext() {
+                return dslContext;
+            }
+        }) {
             @Override
             public void cache() {
                 cache(TEST_KEY, new QueryBuilder<Query>() {

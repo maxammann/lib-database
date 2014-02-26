@@ -16,7 +16,6 @@ import org.jooq.impl.DSL;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -28,7 +27,7 @@ import java.util.List;
  * Holds the connection pool and every else important.
  */
 @Singleton
-public class Database implements Provider<DSLContext>, Closable {
+public class Database implements Closable, DSLProvider {
     /** The default MySQL database port */
     public static final int DEFAULT_PORT = 3306;
 
@@ -193,12 +192,8 @@ public class Database implements Provider<DSLContext>, Closable {
      *
      * @see DSLContext
      */
+    @Override
     public DSLContext getDSLContext() {
         return dslContext;
-    }
-
-    @Override
-    public DSLContext get() {
-        return getDSLContext();
     }
 }
