@@ -53,13 +53,13 @@
     <!-- Distribution management -->
     <distributionManagement>
         <repository>
-            <id>releases</id>
+            <id>rederik-schmitt-releases</id>
             <name>Releases</name>
             <url>http://repo.frederik-schmitt.de/content/repositories/releases</url>
         </repository>
 
         <snapshotRepository>
-            <id>snapshots</id>
+            <id>frederik-schmitt-snapshots</id>
             <name>Snapshots</name>
             <url>http://repo.frederik-schmitt.de/content/repositories/snapshots</url>
         </snapshotRepository>
