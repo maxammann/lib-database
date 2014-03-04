@@ -19,8 +19,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The controller for the database connections.
@@ -66,8 +64,7 @@ public class Database implements Closable, DSLProvider {
     /** The DSL context, use with jOOQ stuff */
     private DSLContext dslContext;
 
-    /** A list of caches for queries */
-    private List<QueryProvider> queryCaches = new ArrayList<>();
+
 
     /**
      * Creates a new connection controller and automatically tries to connect to the database.
@@ -137,11 +134,6 @@ public class Database implements Closable, DSLProvider {
         Settings settings = new Settings();
         settings.setStatementType(StatementType.PREPARED_STATEMENT);
         dslContext = DSL.using(dataSource, SQLDialect.MYSQL, settings);
-
-        // Re-cache queries
-        for (QueryProvider queries : queryCaches) {
-            queries.cache();
-        }
     }
 
     /**
@@ -153,29 +145,12 @@ public class Database implements Closable, DSLProvider {
         return dataSource.getConnection();
     }
 
-    /**
-     * Registers a new query cache class.
-     *
-     * @param cache The cache instance
-     * @return True on success, otherwise false
-     */
-    public boolean addQueryProvider(QueryProvider cache) {
-        cache.cache();
-
-        return queryCaches.add(cache);
-    }
 
     /**
      * Closes the connection/statement pool
      */
     @Override
     public boolean close() {
-        // Clear all query caches
-        for (QueryProvider queryProvider : queryCaches) {
-            queryProvider.close();
-        }
-
-        queryCaches.clear();
 
         try {
             // Try to close the connection

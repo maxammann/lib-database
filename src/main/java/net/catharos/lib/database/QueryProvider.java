@@ -5,15 +5,13 @@ import net.catharos.lib.core.lang.Closable;
 import org.jooq.DSLContext;
 import org.jooq.Query;
 
-import java.util.Map;
-
 /**
  * Provides queries
  */
 public abstract class QueryProvider implements Closable {
 
     private final DSLProvider provider;
-    private Map<QueryKey, QueryBuilder> builders = new THashMap<>();
+    private THashMap<QueryKey, QueryBuilder> builders = new THashMap<>();
 
     protected QueryProvider(DSLProvider provider) {
         this.provider = provider;
