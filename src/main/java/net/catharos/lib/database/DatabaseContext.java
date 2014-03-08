@@ -2,6 +2,7 @@ package net.catharos.lib.database;
 
 import gnu.trove.set.hash.THashSet;
 
+import javax.inject.Inject;
 import java.util.Set;
 
 /**
@@ -14,11 +15,12 @@ public class DatabaseContext {
     private final Set<QueryProvider> queryProviders;
 
 
-    protected DatabaseContext(Database database) {
+    @Inject
+    public DatabaseContext(Database database) {
         this(database, new THashSet<QueryProvider>());
     }
 
-    protected DatabaseContext(Database database, Set<QueryProvider> providers) {
+    public DatabaseContext(Database database, Set<QueryProvider> providers) {
         this.database = database;
         this.queryProviders = new THashSet<>(providers);
     }
