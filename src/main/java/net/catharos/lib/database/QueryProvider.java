@@ -43,6 +43,7 @@ public abstract class QueryProvider implements Closable {
             throw new IllegalStateException("Query " + key + " not found!");
         }
 
+        //todo cache results, but only for specific threads and thread unique
         return key.toQuery(query.create(provider.getDSLContext()));
     }
 

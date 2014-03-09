@@ -64,8 +64,6 @@ public class Database implements Closable, DSLProvider {
     /** The DSL context, use with jOOQ stuff */
     private DSLContext dslContext;
 
-
-
     /**
      * Creates a new connection controller and automatically tries to connect to the database.
      *
