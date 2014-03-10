@@ -15,9 +15,10 @@ public abstract class QueryProvider implements Closable {
 
     protected QueryProvider(DSLProvider provider) {
         this.provider = provider;
+        build();
     }
 
-    public abstract void cache();
+    public abstract void build();
 
     /**
      * Caches one specific query builder.
@@ -25,7 +26,7 @@ public abstract class QueryProvider implements Closable {
      * @param key    The key of the query
      * @param builder The query builder
      */
-    public final <Q extends Query> void cache(QueryKey<Q> key, QueryBuilder<Q> builder) {
+    public final <Q extends Query> void builder(QueryKey<Q> key, QueryBuilder<Q> builder) {
         builders.put(key, builder);
     }
 

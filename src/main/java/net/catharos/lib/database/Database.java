@@ -84,6 +84,8 @@ public class Database implements Closable, DSLProvider {
         this.database = database;
         this.username = username;
         this.password = password;
+
+        initDatabase();
     }
 
     public void initDatabase() {

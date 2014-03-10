@@ -61,8 +61,8 @@ public class DataWorkerTest {
             }
         }) {
             @Override
-            public void cache() {
-                cache(TEST_KEY, new QueryBuilder<Query>() {
+            public void build() {
+                builder(TEST_KEY, new QueryBuilder<Query>() {
                     @Override
                     public Query create(DSLContext context) {
                         return dslContext.query("SELECT 1");
@@ -70,9 +70,6 @@ public class DataWorkerTest {
                 });
             }
         };
-
-        provider.cache();
-
 
         for (int i = 0; i < TRIES; i++) {
 
