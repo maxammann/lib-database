@@ -1,19 +1,23 @@
 package net.catharos.lib.database.data;
 
+import net.catharos.lib.database.DSLProvider;
 import net.catharos.lib.database.data.queue.BatchQueue;
 import net.catharos.lib.database.data.queue.Data;
 import net.catharos.lib.database.data.queue.QueryQueue;
 import org.jooq.DSLContext;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Represents a DataWorker
  */
+@Singleton
 public final class DataWorker implements Runnable {
     private final Thread.UncaughtExceptionHandler exceptionHandler;
-    private final DSLContext context;
+    private final DSLProvider dslProvider;
 
     private final QueryQueue queryQueue = new QueryQueue();
     private final BatchQueue batchQueue = new BatchQueue();
@@ -23,9 +27,10 @@ public final class DataWorker implements Runnable {
     private final Condition ready = lock.newCondition();
     private volatile boolean running = true;
 
-    public DataWorker(Thread.UncaughtExceptionHandler exceptionHandler, DSLContext context) {
+    @Inject
+    public DataWorker(Thread.UncaughtExceptionHandler exceptionHandler, DSLProvider dslProvider) {
         this.exceptionHandler = exceptionHandler;
-        this.context = context;
+        this.dslProvider = dslProvider;
     }
 
     @Override
@@ -54,7 +59,7 @@ public final class DataWorker implements Runnable {
                         if (batchQueue.isAutoFlushPending()) {
                             batchQueue.flushReady();
                         }
-                        batchQueue.execute(context);
+                        batchQueue.execute(dslProvider.getDSLContext());
                     } catch (RuntimeException e) {
                         exceptionHandler.uncaughtException(Thread.currentThread(), e);
                     }
@@ -106,17 +111,13 @@ public final class DataWorker implements Runnable {
         this.running = false;
     }
 
-    public DSLContext getContext() {
-        return context;
-    }
-
     /**
      * @param exceptionHandler The exception handler
-     * @param context          The dsl context
+     * @param dslProvider      The dsl dslProvider
      * @return A default DataWorker
      */
-    public static DataWorker createExecutor(Thread.UncaughtExceptionHandler exceptionHandler, DSLContext context) {
-        return new DataWorker(exceptionHandler, context);
+    public static DataWorker createExecutor(Thread.UncaughtExceptionHandler exceptionHandler, DSLProvider dslProvider) {
+        return new DataWorker(exceptionHandler, dslProvider);
     }
 
     public static Thread createDefaultThread(DataWorker executor) {
@@ -125,10 +126,11 @@ public final class DataWorker implements Runnable {
 
     @Override
     public String toString() {
+        DSLContext context = dslProvider.getDSLContext();
         return "DataWorker{" +
                 "connection=" + "DataWorker["
-                + (getContext() != null
-                ? getContext().configuration().connectionProvider()
+                + (context != null
+                ? context.configuration().connectionProvider()
                 : "")
                 + "]" +
                 ", running=" + running +

@@ -42,24 +42,26 @@ public class DataWorkerTest {
         });
 
 
+        final DSLProvider dslProvider = new DSLProvider() {
+            @Override
+            public DSLContext getDSLContext() {
+                return dslContext;
+            }
+        };
+
         DataWorker controller = new DataWorker(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread t, Throwable e) {
                 throw new AssertionError(e);
             }
-        }, dslContext);
+        }, dslProvider);
 
         Thread thread = DataWorker.createDefaultThread(controller);
         thread.start();
 
         final QueryKey<Query> TEST_KEY = new QueryKey<>();
 
-        final QueryProvider provider = new QueryProvider(new DSLProvider() {
-            @Override
-            public DSLContext getDSLContext() {
-                return dslContext;
-            }
-        }) {
+        final QueryProvider provider = new QueryProvider(dslProvider) {
             @Override
             public void build() {
                 builder(TEST_KEY, new QueryBuilder<Query>() {
