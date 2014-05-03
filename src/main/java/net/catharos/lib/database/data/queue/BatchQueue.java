@@ -20,8 +20,8 @@ public final class BatchQueue implements DataQueue<Data> {
 
     public static final long AUTO_FLUSH_INTERVALL = TimeUnit.SECONDS.toMillis(10);
 
-    private final CopyOnWriteArrayList<BatchEntry> queuesList = new CopyOnWriteArrayList<>();
-    private final LinkedList<BatchEntry> queue = new LinkedList<>();
+    private final CopyOnWriteArrayList<BatchEntry> queuesList = new CopyOnWriteArrayList<BatchEntry>();
+    private final LinkedList<BatchEntry> queue = new LinkedList<BatchEntry>();
     private long lastAutoFlush = System.currentTimeMillis();
 
     public void execute(DSLContext context) throws RuntimeException {

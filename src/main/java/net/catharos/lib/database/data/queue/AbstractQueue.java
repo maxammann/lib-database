@@ -7,7 +7,7 @@ import java.util.LinkedList;
  */
 public abstract class AbstractQueue<T extends Data> implements DataQueue<T> {
 
-    private final LinkedList<T> queue = new LinkedList<>();
+    private final LinkedList<T> queue = new LinkedList<T>();
 
     public T poll() {
         return queue.poll();

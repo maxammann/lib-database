@@ -11,7 +11,7 @@ import org.jooq.Query;
 public abstract class QueryProvider implements Closable {
 
     private final DSLProvider provider;
-    private THashMap<QueryKey, QueryBuilder> builders = new THashMap<>();
+    private THashMap<QueryKey, QueryBuilder> builders = new THashMap<QueryKey, QueryBuilder>();
 
     protected QueryProvider(DSLProvider provider) {
         this.provider = provider;

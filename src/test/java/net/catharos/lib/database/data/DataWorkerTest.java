@@ -59,7 +59,7 @@ public class DataWorkerTest {
         Thread thread = DataWorker.createDefaultThread(controller);
         thread.start();
 
-        final QueryKey<Query> TEST_KEY = new QueryKey<>();
+        final QueryKey<Query> TEST_KEY = new QueryKey<Query>();
 
         final QueryProvider provider = new QueryProvider(dslProvider) {
             @Override
