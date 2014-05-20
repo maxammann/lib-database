@@ -89,7 +89,9 @@ public class Database implements Closable, DSLProvider {
         config.setMaximumPoolSize(MAX_CONNECTIONS);
         config.setMaxLifetime(MAX_LIFETIME);
         config.setDataSourceClassName(MYSQL_DRIVER);
-        config.addDataSourceProperty("url", "jdbc:mysql://" + host + ":" + port + "/" + database);
+        config.addDataSourceProperty("serverName", host);
+        config.addDataSourceProperty("port", port);
+        config.addDataSourceProperty("databaseName", database);
         config.addDataSourceProperty("user", username);
         config.addDataSourceProperty("password", password);
 
