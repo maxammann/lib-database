@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
  * Holds the connection pool and every else important.
  */
 @Singleton
+//todo support other database engines
 public class Database implements Closable, DSLProvider {
     /** The default MySQL database port */
     public static final int DEFAULT_PORT = 3306;
