@@ -8,6 +8,10 @@ import org.jooq.Query;
  */
 public class QueryKey<Q extends Query> {
 
+    public static <Q extends Query> QueryKey<Q> create() {
+        return new QueryKey<Q>();
+    }
+
     public Q toQuery(Query query) {
         try {
             return CastSafe.toGeneric(query);
