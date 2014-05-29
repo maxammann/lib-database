@@ -1,9 +1,10 @@
 package net.catharos.lib.database;
 
 import gnu.trove.map.hash.THashMap;
+import net.catharos.lib.core.concurrent.DefaultPromise;
+import net.catharos.lib.core.concurrent.Future;
 import net.catharos.lib.core.lang.Closable;
-import org.jooq.DSLContext;
-import org.jooq.Query;
+import org.jooq.*;
 import org.jooq.types.UInteger;
 
 import java.sql.Timestamp;
@@ -56,6 +57,17 @@ public abstract class QueryProvider implements Closable {
 
         //todo cache results, but only for specific threads and thread unique
         return key.toQuery(query.create(provider.getDSLContext()));
+    }
+
+    public <T extends Record> Future<T> query(QueryKey<? extends Select<T>> key) {
+        Select<T> query = getQuery(key);
+
+        Result<T> result= query.fetch();
+
+        DefaultPromise<T> future = new DefaultPromise<T>();
+
+        future.setSuccess(result.get(0));
+        return future;
     }
 
     @Override

@@ -31,7 +31,6 @@ public final class QueryQueue extends AbstractQueue<Data> {
         }
     }
 
-    @Override
     public boolean isReady() {
         return !isEmpty();
     }

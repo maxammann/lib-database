@@ -5,7 +5,7 @@ import java.util.LinkedList;
 /**
  * Represents a AbstractQueue
  */
-public abstract class AbstractQueue<T extends Data> implements DataQueue<T> {
+public abstract class AbstractQueue<T extends Data> {
 
     private final LinkedList<T> queue = new LinkedList<T>();
 
@@ -13,7 +13,6 @@ public abstract class AbstractQueue<T extends Data> implements DataQueue<T> {
         return queue.poll();
     }
 
-    @Override
     public void offer(T executor) {
         queue.offer(executor);
     }

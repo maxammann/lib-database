@@ -1,10 +1,8 @@
 package net.catharos.lib.database.data.queue;
 
 import net.catharos.lib.database.QueryKey;
-import net.catharos.lib.database.QueryProvider;
 import org.jooq.BatchBindStep;
 import org.jooq.DSLContext;
-import org.jooq.Query;
 
 import java.util.LinkedList;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -13,15 +11,17 @@ import java.util.concurrent.TimeUnit;
 /**
  * Represents a BatchQueue
  */
-public final class BatchQueue implements DataQueue<Data> {
+public final class BatchQueue {
 
     public static final int CRITICAL_BATCH_SIZE = 100;
     public static final long DEAD_LINE = TimeUnit.MINUTES.toMillis(5);
 
-    public static final long AUTO_FLUSH_INTERVALL = TimeUnit.SECONDS.toMillis(10);
+    public static final long AUTO_FLUSH_INTERVAL = TimeUnit.SECONDS.toMillis(10);
 
     private final CopyOnWriteArrayList<BatchEntry> queuesList = new CopyOnWriteArrayList<BatchEntry>();
     private final LinkedList<BatchEntry> queue = new LinkedList<BatchEntry>();
+
+
     private long lastAutoFlush = System.currentTimeMillis();
 
     public void execute(DSLContext context) throws RuntimeException {
@@ -39,7 +39,6 @@ public final class BatchQueue implements DataQueue<Data> {
         }
     }
 
-    @Override
     public boolean isReady() {
         return !queue.isEmpty();
     }
@@ -63,10 +62,9 @@ public final class BatchQueue implements DataQueue<Data> {
     }
 
     public boolean isAutoFlushPending() {
-        return (System.currentTimeMillis() - AUTO_FLUSH_INTERVALL) > lastAutoFlush;
+        return (System.currentTimeMillis() - AUTO_FLUSH_INTERVAL) > lastAutoFlush;
     }
 
-    @Override
     public void offer(Data executor) {
         QueryKey key = executor.getQueryKey();
         BatchEntry entry = getBatchEntry(key);
@@ -93,60 +91,4 @@ public final class BatchQueue implements DataQueue<Data> {
         return null;
     }
 
-    private static final class BatchEntry extends AbstractQueue<Data> {
-
-        private final long created;
-        private final QueryKey key;
-        private final QueryProvider provider;
-
-        public BatchEntry(QueryKey key, QueryProvider provider) {
-            this.key = key;
-            this.provider = provider;
-            this.created = System.currentTimeMillis();
-        }
-
-        public QueryKey getQueryKey() {
-            return key;
-        }
-
-        public Query getQuery() {
-            return provider.getQuery(key);
-        }
-
-        @Override
-        public void offer(Data executor) {
-            super.offer(executor);
-        }
-
-        @Override
-        public Data poll() {
-            return super.poll();
-        }
-
-        public void execute(BatchBindStep query) throws RuntimeException {
-            Data data;
-
-            while ((data = poll()) != null) {
-                try {
-                    query.bind(data.execute());
-                } catch (RuntimeException e) {
-                    offer(data);
-                    throw e;
-                }
-            }
-        }
-
-        private boolean reachedSize() {
-            return getQueueSize() == CRITICAL_BATCH_SIZE || reachedDeadLine();
-        }
-
-        private boolean reachedDeadLine() {
-            return (System.currentTimeMillis() - DEAD_LINE) > created;
-        }
-
-        @Override
-        public boolean isReady() {
-            return getQueueSize() >= CRITICAL_BATCH_SIZE || reachedDeadLine();
-        }
-    }
 }
