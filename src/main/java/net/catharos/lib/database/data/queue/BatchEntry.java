@@ -6,25 +6,22 @@ import org.jooq.BatchBindStep;
 import org.jooq.DSLContext;
 import org.jooq.Query;
 
-import java.util.concurrent.TimeUnit;
+import java.util.LinkedList;
 
 /**
  * Represents a BatchEntry
  */
-final class BatchEntry extends AbstractQueue<Data> implements Entry {
+final class BatchEntry implements Entry {
 
-    public static final int CRITICAL_BATCH_SIZE = 100;
-    public static final long DEAD_LINE = TimeUnit.MINUTES.toMillis(5);
-
-    public static final long AUTO_FLUSH_INTERVAL = TimeUnit.SECONDS.toMillis(10);
-
-
+    private final LinkedList<Data> queue = new LinkedList<Data>();
     private final long created;
+    private final DefaultQueue.BatchSettings settings;
 
     private final QueryKey key;
     private final QueryProvider provider;
 
-    public BatchEntry(QueryKey key, QueryProvider provider) {
+    public BatchEntry(DefaultQueue.BatchSettings settings, QueryKey key, QueryProvider provider) {
+        this.settings = settings;
         this.key = key;
         this.provider = provider;
         this.created = System.currentTimeMillis();
@@ -38,39 +35,43 @@ final class BatchEntry extends AbstractQueue<Data> implements Entry {
         return provider.getQuery(key);
     }
 
-    @Override
     public void offer(Data data) {
-        super.offer(data);
+        queue.offer(data);
     }
 
-    @Override
     public Data poll() {
-        return super.poll();
+        return queue.poll();
     }
 
     @Override
-    public void execute(DSLContext context) throws RuntimeException {
+    public void execute(DSLContext context) throws DataException {
         BatchBindStep batch = context.batch(getQuery());
-        Data data;
 
+        Data data;
         while ((data = poll()) != null) {
+            Object[] execute;
+
             try {
-                batch.bind(data.execute());
+                execute = data.execute();
             } catch (RuntimeException e) {
                 offer(data);
-                throw e;
+                throw new DataException(e);
             }
+
+            batch.bind(execute);
         }
 
         batch.execute();
     }
 
     private boolean reachedDeadLine() {
-        return (System.currentTimeMillis() - DEAD_LINE) > created;
+        long maxIdle = settings.getMaxIdle();
+        return (System.currentTimeMillis() - maxIdle) > created;
     }
 
     @Override
     public boolean isReady() {
-        return getQueueSize() >= CRITICAL_BATCH_SIZE || reachedDeadLine();
+        int criticalBatchSize = settings.getCriticalBatchSize();
+        return queue.size() >= criticalBatchSize || reachedDeadLine();
     }
 }

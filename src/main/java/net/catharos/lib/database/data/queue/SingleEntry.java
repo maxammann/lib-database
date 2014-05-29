@@ -15,10 +15,18 @@ public class SingleEntry implements Entry {
     public SingleEntry(Data data) {this.data = data;}
 
     @Override
-    public void execute(DSLContext context) throws RuntimeException {
+    public void execute(DSLContext context) throws DataException {
+
+        Object[] obj;
+
+        try {
+            obj = data.execute();
+        } catch (RuntimeException e) {
+            throw new DataException(e);
+        }
+
         QueryKey key = data.getQueryKey();
         QueryProvider provider = data.getQueryProvider();
-        Object[] obj = data.execute();
 
         Query query = provider.getQuery(key);
 

@@ -6,6 +6,7 @@ import net.catharos.lib.database.DatabaseMock;
 import net.catharos.lib.database.QueryKey;
 import net.catharos.lib.database.QueryProvider;
 import net.catharos.lib.database.data.queue.Data;
+import net.catharos.lib.database.data.queue.DefaultQueue;
 import org.jooq.DSLContext;
 import org.jooq.Query;
 import org.jooq.tools.jdbc.MockDataProvider;
@@ -17,6 +18,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.sql.SQLException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -25,36 +27,36 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RunWith(JUnit4.class)
 public class DataWorkerTest {
 
-    public static final int TRIES = 1000000;
+    public static final int TRIES = 1000;
+
     private AtomicInteger queries = new AtomicInteger();
+
+    private DSLContext dslContext = DatabaseMock.mockedDSLContext(new MockDataProvider() {
+
+        @Override
+        public MockResult[] execute(MockExecuteContext ctx) throws SQLException {
+            queries.addAndGet(ctx.batchBindings().length);
+            return new MockResult[0];
+        }
+    });
+
+    private DSLProvider dslProvider = new DSLProvider() {
+        @Override
+        public DSLContext getDSLContext() {
+            return dslContext;
+        }
+    };
 
     @Test
     public void testQueues() {
         long start = System.nanoTime();
-
-        final DSLContext dslContext = DatabaseMock.mockedDSLContext(new MockDataProvider() {
-
-            @Override
-            public MockResult[] execute(MockExecuteContext ctx) throws SQLException {
-                queries.addAndGet(ctx.batchBindings().length);
-                return new MockResult[0];
-            }
-        });
-
-
-        final DSLProvider dslProvider = new DSLProvider() {
-            @Override
-            public DSLContext getDSLContext() {
-                return dslContext;
-            }
-        };
 
         DataWorker controller = new DataWorker(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread t, Throwable e) {
                 throw new AssertionError(e);
             }
-        }, dslProvider);
+        }, dslProvider, new DefaultQueue(5, 5, TimeUnit.MINUTES, 50));
 
         Thread thread = DataWorker.createDefaultThread(controller);
         thread.start();
@@ -119,7 +121,7 @@ public class DataWorkerTest {
         }
 
         long finish = System.nanoTime();
-        System.out.printf("Check took %s!%n", (double) (finish - start) / (double) (TRIES * 2));
+        System.out.printf("Check took %s!%n", (double) (finish - start));
 
         Assert.assertEquals(TRIES * 2, queries.get());
     }

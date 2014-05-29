@@ -7,7 +7,7 @@ import org.jooq.DSLContext;
  */
 public interface Entry {
 
-    public void execute(DSLContext context) throws RuntimeException;
+    public void execute(DSLContext context) throws DataException;
 
     boolean isReady();
 }

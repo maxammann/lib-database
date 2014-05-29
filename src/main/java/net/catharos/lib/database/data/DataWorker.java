@@ -1,13 +1,13 @@
 package net.catharos.lib.database.data;
 
 import net.catharos.lib.database.DSLProvider;
-import net.catharos.lib.database.data.queue.DefaultQueue;
 import net.catharos.lib.database.data.queue.Data;
+import net.catharos.lib.database.data.queue.DataException;
+import net.catharos.lib.database.data.queue.Queue;
 import org.jooq.DSLContext;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -19,7 +19,7 @@ public final class DataWorker implements Runnable {
     private final Thread.UncaughtExceptionHandler exceptionHandler;
     private final DSLProvider dslProvider;
 
-    private final DefaultQueue dataQueue = new DefaultQueue(5, 5, TimeUnit.MINUTES, 100);
+    private final Queue dataQueue;
 
     private final ReentrantLock lock = new ReentrantLock();
     private final Condition idle = lock.newCondition();
@@ -28,9 +28,10 @@ public final class DataWorker implements Runnable {
     private volatile boolean running = true;
 
     @Inject
-    public DataWorker(Thread.UncaughtExceptionHandler exceptionHandler, DSLProvider dslProvider) {
+    public DataWorker(Thread.UncaughtExceptionHandler exceptionHandler, DSLProvider dslProvider, Queue dataQueue) {
         this.exceptionHandler = exceptionHandler;
         this.dslProvider = dslProvider;
+        this.dataQueue = dataQueue;
     }
 
     @Override
@@ -53,15 +54,14 @@ public final class DataWorker implements Runnable {
                 }
 
                 if (batchReady) {
-                    try {
-                        if (dataQueue.isAutoFlushPending()) {
-                            dataQueue.flushReady();
-                        }
-                        dataQueue.execute(dslProvider.getDSLContext());
-                    } catch (RuntimeException e) {
-                        exceptionHandler.uncaughtException(Thread.currentThread(), e);
+                    if (dataQueue.isFlushPending()) {
+                        dataQueue.flushReady();
                     }
+
+                    dataQueue.execute(dslProvider.getDSLContext());
                 }
+            } catch (DataException e) {
+                exceptionHandler.uncaughtException(Thread.currentThread(), e);
             } finally {
                 lock.unlock();
             }
@@ -71,7 +71,7 @@ public final class DataWorker implements Runnable {
     public void publishBatch(Data data) {
         try {
             lock.lock();
-            dataQueue.batchOffer(data);
+            dataQueue.publishBatch(data);
             ready.signal();
         } finally {
             lock.unlock();
@@ -82,7 +82,7 @@ public final class DataWorker implements Runnable {
     public void publishSingle(Data data) {
         try {
             lock.lock();
-            dataQueue.singleOffer(data);
+            dataQueue.publishSingle(data);
             ready.signal();
         } finally {
             lock.unlock();
