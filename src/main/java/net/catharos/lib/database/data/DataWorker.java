@@ -1,13 +1,13 @@
 package net.catharos.lib.database.data;
 
 import net.catharos.lib.database.DSLProvider;
-import net.catharos.lib.database.data.queue.BatchQueue;
+import net.catharos.lib.database.data.queue.DefaultQueue;
 import net.catharos.lib.database.data.queue.Data;
-import net.catharos.lib.database.data.queue.QueryQueue;
 import org.jooq.DSLContext;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -19,12 +19,12 @@ public final class DataWorker implements Runnable {
     private final Thread.UncaughtExceptionHandler exceptionHandler;
     private final DSLProvider dslProvider;
 
-    private final QueryQueue queryQueue = new QueryQueue();
-    private final BatchQueue batchQueue = new BatchQueue();
+    private final DefaultQueue dataQueue = new DefaultQueue(5, 5, TimeUnit.MINUTES, 100);
 
     private final ReentrantLock lock = new ReentrantLock();
     private final Condition idle = lock.newCondition();
     private final Condition ready = lock.newCondition();
+
     private volatile boolean running = true;
 
     @Inject
@@ -38,10 +38,9 @@ public final class DataWorker implements Runnable {
         while (running) {
             try {
                 lock.lock();
-                boolean batchReady = batchQueue.isReady();
-                boolean queryReady = queryQueue.isReady();
+                boolean batchReady = dataQueue.isReady();
 
-                if (!batchReady && !queryReady) {
+                if (!batchReady) {
                     idle.signal();
 
                     try {
@@ -50,24 +49,15 @@ public final class DataWorker implements Runnable {
                         break;
                     }
 
-                    batchReady = batchQueue.isReady();
-                    queryReady = queryQueue.isReady();
+                    batchReady = dataQueue.isReady();
                 }
 
                 if (batchReady) {
                     try {
-                        if (batchQueue.isAutoFlushPending()) {
-                            batchQueue.flushReady();
+                        if (dataQueue.isAutoFlushPending()) {
+                            dataQueue.flushReady();
                         }
-                        batchQueue.execute(dslProvider.getDSLContext());
-                    } catch (RuntimeException e) {
-                        exceptionHandler.uncaughtException(Thread.currentThread(), e);
-                    }
-                }
-
-                if (queryReady) {
-                    try {
-                        queryQueue.execute();
+                        dataQueue.execute(dslProvider.getDSLContext());
                     } catch (RuntimeException e) {
                         exceptionHandler.uncaughtException(Thread.currentThread(), e);
                     }
@@ -78,20 +68,21 @@ public final class DataWorker implements Runnable {
         }
     }
 
-    public void addQuery(Data data) {
+    public void publishBatch(Data data) {
         try {
             lock.lock();
-            queryQueue.offer(data);
+            dataQueue.batchOffer(data);
             ready.signal();
         } finally {
             lock.unlock();
         }
     }
 
-    public void addBatch(Data data) {
+
+    public void publishSingle(Data data) {
         try {
             lock.lock();
-            batchQueue.offer(data);
+            dataQueue.singleOffer(data);
             ready.signal();
         } finally {
             lock.unlock();
@@ -101,7 +92,7 @@ public final class DataWorker implements Runnable {
     public void stop() throws InterruptedException {
         try {
             lock.lock();
-            batchQueue.flushAll();
+            dataQueue.flushAll();
             ready.signal();
             idle.await();
         } finally {
@@ -109,15 +100,6 @@ public final class DataWorker implements Runnable {
         }
 
         this.running = false;
-    }
-
-    /**
-     * @param exceptionHandler The exception handler
-     * @param dslProvider      The dsl dslProvider
-     * @return A default DataWorker
-     */
-    public static DataWorker createExecutor(Thread.UncaughtExceptionHandler exceptionHandler, DSLProvider dslProvider) {
-        return new DataWorker(exceptionHandler, dslProvider);
     }
 
     public static Thread createDefaultThread(DataWorker executor) {

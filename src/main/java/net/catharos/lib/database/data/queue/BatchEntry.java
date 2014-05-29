@@ -3,14 +3,24 @@ package net.catharos.lib.database.data.queue;
 import net.catharos.lib.database.QueryKey;
 import net.catharos.lib.database.QueryProvider;
 import org.jooq.BatchBindStep;
+import org.jooq.DSLContext;
 import org.jooq.Query;
 
+import java.util.concurrent.TimeUnit;
+
 /**
-* Represents a BatchEntry
-*/
-final class BatchEntry extends AbstractQueue<Data> {
+ * Represents a BatchEntry
+ */
+final class BatchEntry extends AbstractQueue<Data> implements Entry {
+
+    public static final int CRITICAL_BATCH_SIZE = 100;
+    public static final long DEAD_LINE = TimeUnit.MINUTES.toMillis(5);
+
+    public static final long AUTO_FLUSH_INTERVAL = TimeUnit.SECONDS.toMillis(10);
+
 
     private final long created;
+
     private final QueryKey key;
     private final QueryProvider provider;
 
@@ -29,8 +39,8 @@ final class BatchEntry extends AbstractQueue<Data> {
     }
 
     @Override
-    public void offer(Data executor) {
-        super.offer(executor);
+    public void offer(Data data) {
+        super.offer(data);
     }
 
     @Override
@@ -38,28 +48,29 @@ final class BatchEntry extends AbstractQueue<Data> {
         return super.poll();
     }
 
-    public void execute(BatchBindStep query) throws RuntimeException {
+    @Override
+    public void execute(DSLContext context) throws RuntimeException {
+        BatchBindStep batch = context.batch(getQuery());
         Data data;
 
         while ((data = poll()) != null) {
             try {
-                query.bind(data.execute());
+                batch.bind(data.execute());
             } catch (RuntimeException e) {
                 offer(data);
                 throw e;
             }
         }
+
+        batch.execute();
     }
 
-    public boolean reachedSize() {
-        return getQueueSize() == BatchQueue.CRITICAL_BATCH_SIZE || reachedDeadLine();
+    private boolean reachedDeadLine() {
+        return (System.currentTimeMillis() - DEAD_LINE) > created;
     }
 
-    public boolean reachedDeadLine() {
-        return (System.currentTimeMillis() - BatchQueue.DEAD_LINE) > created;
-    }
-
+    @Override
     public boolean isReady() {
-        return getQueueSize() >= BatchQueue.CRITICAL_BATCH_SIZE || reachedDeadLine();
+        return getQueueSize() >= CRITICAL_BATCH_SIZE || reachedDeadLine();
     }
 }

@@ -75,7 +75,7 @@ public class DataWorkerTest {
 
         for (int i = 0; i < TRIES; i++) {
 
-            controller.addQuery(new Data() {
+            controller.publishBatch(new Data() {
 
                 @Override
                 public QueryProvider getQueryProvider() {
@@ -93,7 +93,7 @@ public class DataWorkerTest {
                 }
             });
 
-            controller.addBatch(new Data() {
+            controller.publishSingle(new Data() {
 
                 @Override
                 public QueryProvider getQueryProvider() {
