@@ -1,13 +1,14 @@
 package net.catharos.lib.database;
 
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
 import gnu.trove.map.hash.THashMap;
-import net.catharos.lib.core.concurrent.DefaultPromise;
-import net.catharos.lib.core.concurrent.Future;
 import net.catharos.lib.core.lang.Closable;
 import org.jooq.*;
 import org.jooq.types.UInteger;
 
 import java.sql.Timestamp;
+import java.util.concurrent.Callable;
 
 /**
  * Provides queries
@@ -34,7 +35,7 @@ public abstract class QueryProvider implements Closable {
     /**
      * Caches one specific query builder.
      *
-     * @param key    The key of the query
+     * @param key     The key of the query
      * @param builder The query builder
      */
     public final <Q extends Query> void builder(QueryKey<Q> key, QueryBuilder<Q> builder) {
@@ -44,7 +45,7 @@ public abstract class QueryProvider implements Closable {
     /**
      * Gets/Creates a query.
      *
-     * @param key  The key of the query
+     * @param key The key of the query
      * @param <Q> The type of the query
      * @return The query from the cache
      */
@@ -59,15 +60,13 @@ public abstract class QueryProvider implements Closable {
         return key.toQuery(query.create(provider.getDSLContext()));
     }
 
-    public <T extends Record> Future<T> query(QueryKey<? extends Select<T>> key) {
-        Select<T> query = getQuery(key);
-
-        Result<T> result= query.fetch();
-
-        DefaultPromise<T> future = new DefaultPromise<T>();
-
-        future.setSuccess(result.get(0));
-        return future;
+    public <R extends Record> ListenableFuture<Result<R>> query(ListeningExecutorService service, final Select<R> query) {
+        return service.submit(new Callable<Result<R>>() {
+            @Override
+            public Result<R> call() throws Exception {
+                return query.fetch();
+            }
+        });
     }
 
     @Override
