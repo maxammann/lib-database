@@ -1,5 +1,6 @@
 package net.catharos.lib.database.data.queue;
 
+import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import gnu.trove.map.hash.THashMap;
 import gnu.trove.procedure.TObjectProcedure;
@@ -25,6 +26,7 @@ public final class DefaultQueue implements Queue {
     private final LinkedList<Entry> pending = new LinkedList<Entry>();
 
 
+    @Inject
     public DefaultQueue(@Named("auto-flush-interval") long autoFlushInterval,
                         @Named("max-batch-idle") long maxIdle,
                         @Named("queue-time-unit") TimeUnit unit,
