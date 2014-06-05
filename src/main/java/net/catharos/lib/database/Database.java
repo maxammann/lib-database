@@ -11,6 +11,7 @@ import java.sql.SQLException;
  *
  */
 public interface Database extends Closable, DSLProvider {
+
     Connection getConnection() throws SQLException;
 
     DataSource getDataSource();
