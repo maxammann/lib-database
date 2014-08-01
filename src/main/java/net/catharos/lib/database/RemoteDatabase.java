@@ -14,11 +14,11 @@ import javax.inject.Singleton;
 @Singleton
 public class RemoteDatabase extends AbstractDatabase {
 
-    public static final String DB_HOST_KEY = "db-host";
-    public static final String DB_PORT_KEY = "db-port";
-    public static final String DB_DATABASE_KEY = "db-database";
-    public static final String DB_USERNAME_KEY = "db-username";
-    public static final String DB_PASSWORD_KEY = "db-password";
+    public static final String DB_HOST_KEY = "database-host";
+    public static final String DB_PORT_KEY = "database-port";
+    public static final String DB_DATABASE_KEY = "database-database";
+    public static final String DB_USERNAME_KEY = "database-username";
+    public static final String DB_PASSWORD_KEY = "database-password";
 
     private final String host;
     private final int port;
