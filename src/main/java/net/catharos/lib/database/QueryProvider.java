@@ -60,6 +60,10 @@ public abstract class QueryProvider implements Closable {
         return key.toQuery(query.create(provider.getDSLContext()));
     }
 
+    public <R extends Record> ListenableFuture<Result<R>> query(ListeningExecutorService service, final QueryKey<? extends Select<R>> key) {
+        return query(service, getQuery(key));
+    }
+
     public <R extends Record> ListenableFuture<Result<R>> query(ListeningExecutorService service, final Select<R> query) {
         return service.submit(new Callable<Result<R>>() {
             @Override
