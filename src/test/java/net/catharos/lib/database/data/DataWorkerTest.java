@@ -117,7 +117,7 @@ public class DataWorkerTest {
         try {
             controller.stop();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+           throw new RuntimeException(e);
         }
 
         long finish = System.nanoTime();
