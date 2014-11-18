@@ -23,6 +23,7 @@ public abstract class QueryProvider implements Closable {
     public static final String DEFAULT_STRING = "";
     public static final UInteger DEFAULT_UINTEGER = UInteger.valueOf(0);
     public static final Double DEFAULT_DOUBLE = 0d;
+    public static final short DEFAULT_SHORT = 0;
     public static final Timestamp DEFAULT_TIMESTAMP = new Timestamp(System.currentTimeMillis());
 
     protected QueryProvider(DSLProvider provider) {
