@@ -45,7 +45,7 @@ public abstract class AbstractDatabase implements Database {
 
     public abstract HikariConfig createConfig();
 
-    protected void initDatabase() {
+    public void initDatabase() {
         this.dataSource = new HikariDataSource(createConfig());
 
         // Create a MySQL DSL context

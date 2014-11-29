@@ -16,6 +16,8 @@ public interface Database extends Closable, DSLProvider {
 
     DataSource getDataSource();
 
+    void initDatabase();
+
     @Override
     boolean close();
 

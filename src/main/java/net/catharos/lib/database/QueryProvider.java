@@ -58,6 +58,9 @@ public abstract class QueryProvider implements Closable {
         }
 
         //beautify cache results, but only for specific threads and thread unique
+        if (provider.getDSLContext() == null) {
+            throw new RuntimeException("Database not initialized!");
+        }
         return key.toQuery(query.create(provider.getDSLContext()));
     }
 
