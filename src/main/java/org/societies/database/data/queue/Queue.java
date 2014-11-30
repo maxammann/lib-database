@@ -1,4 +1,4 @@
-package net.catharos.lib.database.data.queue;
+package org.societies.database.data.queue;
 
 import org.jooq.DSLContext;
 

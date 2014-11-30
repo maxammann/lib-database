@@ -1,12 +1,6 @@
-package net.catharos.lib.database.data;
+package org.societies.database.data;
 
 
-import net.catharos.lib.database.DSLProvider;
-import net.catharos.lib.database.DatabaseMock;
-import net.catharos.lib.database.QueryKey;
-import net.catharos.lib.database.QueryProvider;
-import net.catharos.lib.database.data.queue.Data;
-import net.catharos.lib.database.data.queue.DefaultQueue;
 import org.jooq.DSLContext;
 import org.jooq.Query;
 import org.jooq.tools.jdbc.MockDataProvider;
@@ -16,6 +10,12 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.societies.database.DSLProvider;
+import org.societies.database.DatabaseMock;
+import org.societies.database.QueryKey;
+import org.societies.database.QueryProvider;
+import org.societies.database.data.queue.Data;
+import org.societies.database.data.queue.DefaultQueue;
 
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
@@ -117,7 +117,7 @@ public class DataWorkerTest {
         try {
             controller.stop();
         } catch (InterruptedException e) {
-           throw new RuntimeException(e);
+            throw new RuntimeException(e);
         }
 
         long finish = System.nanoTime();

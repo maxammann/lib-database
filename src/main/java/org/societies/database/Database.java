@@ -1,4 +1,4 @@
-package net.catharos.lib.database;
+package org.societies.database;
 
 import net.catharos.lib.core.lang.Closable;
 import org.jooq.DSLContext;

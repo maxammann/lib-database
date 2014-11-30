@@ -1,10 +1,10 @@
-package net.catharos.lib.database.data.queue;
+package org.societies.database.data.queue;
 
-import net.catharos.lib.database.QueryKey;
-import net.catharos.lib.database.QueryProvider;
 import org.jooq.BatchBindStep;
 import org.jooq.DSLContext;
 import org.jooq.Query;
+import org.societies.database.QueryKey;
+import org.societies.database.QueryProvider;
 
 import java.util.LinkedList;
 

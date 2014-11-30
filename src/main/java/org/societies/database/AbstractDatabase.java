@@ -1,4 +1,4 @@
-package net.catharos.lib.database;
+package org.societies.database;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;

@@ -1,4 +1,4 @@
-package net.catharos.lib.database;
+package org.societies.database;
 
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;

@@ -1,4 +1,4 @@
-package net.catharos.lib.database;
+package org.societies.database;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;

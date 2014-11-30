@@ -1,7 +1,7 @@
-package net.catharos.lib.database.data.queue;
+package org.societies.database.data.queue;
 
-import net.catharos.lib.database.QueryKey;
-import net.catharos.lib.database.QueryProvider;
+import org.societies.database.QueryKey;
+import org.societies.database.QueryProvider;
 
 /**
  * Represents a Data

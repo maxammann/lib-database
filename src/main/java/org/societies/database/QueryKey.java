@@ -1,4 +1,4 @@
-package net.catharos.lib.database;
+package org.societies.database;
 
 import net.catharos.lib.core.util.CastSafe;
 import org.jooq.Query;

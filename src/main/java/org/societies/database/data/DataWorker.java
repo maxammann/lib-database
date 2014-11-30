@@ -1,10 +1,10 @@
-package net.catharos.lib.database.data;
+package org.societies.database.data;
 
-import net.catharos.lib.database.DSLProvider;
-import net.catharos.lib.database.data.queue.Data;
-import net.catharos.lib.database.data.queue.DataException;
-import net.catharos.lib.database.data.queue.Queue;
 import org.jooq.DSLContext;
+import org.societies.database.DSLProvider;
+import org.societies.database.data.queue.Data;
+import org.societies.database.data.queue.DataException;
+import org.societies.database.data.queue.Queue;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

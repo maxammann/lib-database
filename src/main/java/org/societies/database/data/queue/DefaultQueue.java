@@ -1,13 +1,13 @@
-package net.catharos.lib.database.data.queue;
+package org.societies.database.data.queue;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import gnu.trove.map.hash.THashMap;
 import gnu.trove.procedure.TObjectProcedure;
-import net.catharos.lib.database.QueryKey;
-import net.catharos.lib.database.QueryProvider;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.DSLContext;
+import org.societies.database.QueryKey;
+import org.societies.database.QueryProvider;
 
 import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
