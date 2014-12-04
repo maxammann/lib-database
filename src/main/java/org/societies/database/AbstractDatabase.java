@@ -75,6 +75,10 @@ public abstract class AbstractDatabase implements Database {
     @Override
     public boolean close() {
 
+        if (dataSource == null) {
+            return true;
+        }
+
         try {
             // Try to close the connection
             dataSource.shutdown();
