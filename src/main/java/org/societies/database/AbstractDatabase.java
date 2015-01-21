@@ -45,6 +45,7 @@ public abstract class AbstractDatabase implements Database {
 
     public abstract HikariConfig createConfig();
 
+    @Override
     public void initDatabase() {
         this.dataSource = new HikariDataSource(createConfig());
 

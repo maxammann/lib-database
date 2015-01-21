@@ -46,7 +46,7 @@ public final class DataWorker implements Runnable {
 
                     try {
                         ready.await();
-                    } catch (InterruptedException e) {
+                    } catch (InterruptedException ignored) {
                         break;
                     }
 
