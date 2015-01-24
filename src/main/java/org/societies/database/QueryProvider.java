@@ -8,6 +8,7 @@ import org.jooq.*;
 import org.jooq.types.UInteger;
 
 import java.sql.Timestamp;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 /**
@@ -18,8 +19,11 @@ public abstract class QueryProvider implements Closable {
     private final DSLProvider provider;
     private THashMap<QueryKey, QueryBuilder> builders = new THashMap<QueryKey, QueryBuilder>();
 
+    public static final UUID DEFAULT_UUID = new UUID(0L, 0L);
+
     public static final byte[] DEFAULT_BYTE_ARRAY = new byte[0];
-    public static final byte[] DEFAULT_UUID = DEFAULT_BYTE_ARRAY;
+
+
     public static final String DEFAULT_STRING = "";
     public static final UInteger DEFAULT_UINTEGER = UInteger.valueOf(0);
     public static final Double DEFAULT_DOUBLE = 0d;
@@ -41,6 +45,14 @@ public abstract class QueryProvider implements Closable {
      */
     public final <Q extends Query> void builder(QueryKey<Q> key, QueryBuilder<Q> builder) {
         builders.put(key, builder);
+    }
+
+    protected static UUID uuid_param(String name) {
+        return  new UUID(0L,0L);
+    }
+
+    protected static UUID uuid_param() {
+        return new UUID(0L,0L);
     }
 
     /**

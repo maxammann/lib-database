@@ -51,8 +51,6 @@ public class RemoteDatabase extends AbstractDatabase {
         this.database = database;
         this.username = username;
         this.password = password;
-
-//        initDatabase();
     }
 
 
