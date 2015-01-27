@@ -4,10 +4,11 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import gnu.trove.map.hash.THashMap;
 import net.catharos.lib.core.lang.Closable;
+import org.joda.time.DateTime;
 import org.jooq.*;
+import org.jooq.impl.DSL;
 import org.jooq.types.UInteger;
 
-import java.sql.Timestamp;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
@@ -28,7 +29,7 @@ public abstract class QueryProvider implements Closable {
     public static final UInteger DEFAULT_UINTEGER = UInteger.valueOf(0);
     public static final Double DEFAULT_DOUBLE = 0d;
     public static final short DEFAULT_SHORT = 0;
-    public static final Timestamp DEFAULT_TIMESTAMP = new Timestamp(System.currentTimeMillis());
+    public static final DateTime DEFAULT_TIMESTAMP = DateTime.now();
 
     protected QueryProvider(DSLProvider provider) {
         this.provider = provider;
@@ -47,12 +48,16 @@ public abstract class QueryProvider implements Closable {
         builders.put(key, builder);
     }
 
-    protected static UUID uuid_param(String name) {
-        return  new UUID(0L,0L);
+    protected static UUID id_param() {
+        return new UUID(0L, 0L);
     }
 
-    protected static UUID uuid_param() {
-        return new UUID(0L,0L);
+    protected static Param<UUID> uuid_param() {
+        return DSL.param("uuid", UUID.class);
+    }
+
+    protected static Param<UUID> uuid_param(String name) {
+        return DSL.param(name, UUID.class);
     }
 
     /**
