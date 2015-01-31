@@ -1,7 +1,5 @@
 package org.societies.database;
 
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
 import gnu.trove.map.hash.THashMap;
 import net.catharos.lib.core.lang.Closable;
 import org.joda.time.DateTime;
@@ -10,7 +8,6 @@ import org.jooq.impl.DSL;
 import org.jooq.types.UInteger;
 
 import java.util.UUID;
-import java.util.concurrent.Callable;
 
 /**
  * Provides queries
@@ -81,17 +78,12 @@ public abstract class QueryProvider implements Closable {
         return key.toQuery(query.create(provider.getDSLContext()));
     }
 
-    public <R extends Record> ListenableFuture<Result<R>> query(ListeningExecutorService service, final QueryKey<? extends Select<R>> key) {
-        return query(service, getQuery(key));
+    public <R extends Record> Result<R> query(final QueryKey<? extends Select<R>> key) {
+        return query(getQuery(key));
     }
 
-    public <R extends Record> ListenableFuture<Result<R>> query(ListeningExecutorService service, final Select<R> query) {
-        return service.submit(new Callable<Result<R>>() {
-            @Override
-            public Result<R> call() throws Exception {
-                return query.fetch();
-            }
-        });
+    public <R extends Record> Result<R> query(final Select<R> query) {
+        return query.fetch();
     }
 
     @Override
